@@ -1,0 +1,75 @@
+version: "3.8"
+
+services: 
+  tomcat01:  #service name
+    container_name: tomcat01
+    image: tomcat:9.0.52-jdk8-openjdk  # which image will be used.
+    ports: #expose ports which mapping host port and container port.
+      - "8080:8080"
+    volumes: #share directory.
+      - tomcat_9.0.52_app01:/usr/local/tomcat/webapps
+    networks:
+      - hello
+    depends_on:
+      - tomcat02
+      - redis
+      - mysql
+
+  tomcat02: #service name
+    container_name: tomcat02
+    image: tomcat:9.0.52-jdk8-openjdk  # which image will be used.
+    ports: #expose ports which mapping host port and container port.
+      - "8081:8080"
+    volumes: #share directory.
+      - tomcat_9.0.52_app02:/usr/local/tomcat/webapps
+    networks:
+      - hello
+
+  mysql:
+    container_name: mysql
+    image: mysql:5.7.35
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_5.7.35_data:/var/lib/mysql
+      - mysql_5.7.35_config:/etc/mysql
+    #environment:
+      #- MYSQL_ROOT_PASSWORD=root
+    env_file:
+      - ./mysql_env
+    networks:
+      - hello
+
+  redis:
+    container_name: redis
+    image: redis:5.0.13
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_5.0.13_data:/data
+    command:
+      "redis-server --appendonly yes"
+    networks:
+      - hello
+
+volumes: #define volume.
+  tomcat_9.0.52_app01: # define volume name.
+    external:
+      true
+  tomcat_9.0.52_app02: # define volume name.
+    external:
+      true
+  mysql_5.7.35_data:
+    external:
+      true
+  mysql_5.7.35_config:
+    external:
+      true
+  redis_5.0.13_data:
+    external:
+      true
+
+networks:
+  hello:
+    external:
+      true
